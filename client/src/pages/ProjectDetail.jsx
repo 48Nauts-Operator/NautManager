@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown'; // Import react-markdown
 import rehypeHighlight from 'rehype-highlight'; // Import syntax highlighting plugin
 // import 'highlight.js/styles/github-dark.css'; // Temporarily comment out theme
 
-const API_URL = 'http://localhost:3001/api'; // Backend API base URL
+const API_URL = 'http://localhost:3009/api'; // Update port to 3009
 
 // Helper component for individual summary items
 const SummaryItem = ({ label, value, children }) => (

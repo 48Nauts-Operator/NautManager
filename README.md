@@ -112,17 +112,27 @@ NautManager/
 
 ### Running the Application
 
-1.  **Start the Backend Server:**
-    *   Open a terminal in the `server` directory.
-    *   Run: `npm run dev`
-    *   The server should start (defaults to `http://localhost:3001`). Check for a database connection success message.
+1.  **Start the Backend Server & Database:**
+    *   Open a terminal in the project root (`NautManager/`).
+    *   Ensure Docker is running.
+    *   Run: `docker-compose up -d db server` 
+    *   The backend server should start. Check its logs: `docker-compose logs -f server`. It will be accessible on the host at `http://localhost:3009` (or the `PORT` set in `.env`).
 
 2.  **Start the Frontend Development Server:**
     *   Open a separate terminal in the `client` directory.
     *   Run: `npm run dev`
     *   The frontend should start (defaults to `http://localhost:5177`).
 
-3.  **Open the App:**
+3.  **(Optional) Start the Filesystem Watcher:**
+    *   This service automatically adds new projects to NautManager when you create a folder containing `doc/concept.md` or `doc/README.md` directly inside your main development projects directory.
+    *   **Configuration:** You MUST create a `.env` file in the project root (`NautManager/.env`). Add the following line, replacing the path with the **absolute path** to the single parent directory on your computer that holds *all* the development project folders you want the watcher to monitor:
+        ```dotenv
+        # Example: Monitor folders created directly inside /Users/me/dev/projects
+        HOST_WATCH_PATH=/Users/your_username/path/to/your/dev/projects 
+        ```
+        *The watcher will detect new folders like `/Users/me/dev/projects/new-app-1`, `/Users/me/dev/projects/new-app-2`, etc.*
+
+4.  **Open the App:**
     *   Navigate to `http://localhost:5177` (or the port specified by Vite) in your web browser.
 
 ## TODO / Future Features

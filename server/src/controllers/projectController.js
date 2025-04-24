@@ -5,27 +5,43 @@ import { query } from '../../db/index.js'; // Correct relative path
 
 // GET /api/projects
 export const getAllProjects = async (req, res) => {
-  // Check for query parameter ?archived=true
+  // Check for query parameters
   const showArchived = req.query.archived === 'true'; 
-  console.log(`Controller: getAllProjects called (showArchived: ${showArchived})`);
-  
-  // Base query
-  let selectQuery = 'SELECT * FROM projects';
-  const queryParams = [];
+  const localPathFilter = req.query.local_path; // New filter
 
-  // Add WHERE clause based on the query parameter
-  if (showArchived) {
-    selectQuery += ' WHERE is_archived = true';
-  } else {
-    // Default: only show non-archived projects
-    selectQuery += ' WHERE is_archived = false';
+  console.log(`Controller: getAllProjects called (showArchived: ${showArchived}, local_path: ${localPathFilter})`);
+  
+  // Base query and parameters
+  let selectQuery = 'SELECT * FROM projects';
+  const conditions = [];
+  const queryParams = [];
+  let paramIndex = 1;
+
+  // Add WHERE clauses based on query parameters
+  if (localPathFilter !== undefined) {
+      conditions.push(`local_path = $${paramIndex++}`);
+      queryParams.push(localPathFilter);
+  } 
+  // Apply archive filter (only if local_path filter wasn't the primary goal)
+  if (localPathFilter === undefined) {
+      conditions.push(`is_archived = $${paramIndex++}`);
+      queryParams.push(showArchived); 
+  }
+  
+  if (conditions.length > 0) {
+      selectQuery += ` WHERE ${conditions.join(' AND ')}`;
   }
 
-  // Add ordering
-  selectQuery += ' ORDER BY last_updated_at DESC';
+  // Add ordering (only apply default sort if not filtering by specific path)
+  if (localPathFilter === undefined) {
+      selectQuery += ' ORDER BY last_updated_at DESC';
+  }
+
+  console.log(`Executing Query: ${selectQuery}`, queryParams);
 
   try {
     const { rows } = await query(selectQuery, queryParams);
+    // If filtering by path, we expect 0 or 1 result
     res.status(200).json(rows);
   } catch (error) {
     console.error('Error fetching projects:', error);

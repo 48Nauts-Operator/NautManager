@@ -9,7 +9,7 @@ import ProjectDetail from './pages/ProjectDetail'; // Import the actual componen
 // const ArchivePagePlaceholder = () => <h2>Archived Projects Placeholder</h2>;
 import ArchivePage from './pages/ArchivePage'; // Import actual archive page
 
-const API_URL = 'http://localhost:3001/api'; // Define API URL here
+const API_URL = 'http://localhost:3009/api'; // Update port to 3009
 
 // Placeholder for ProjectDetail page (we'll create this next)
 // const ProjectDetailPlaceholder = () => <h2>Project Detail Page Placeholder</h2>;

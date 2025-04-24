@@ -1,23 +1,74 @@
 version: '3.8'
 
+networks: # Define a default network
+  nautmanager_net:
+    driver: bridge
+
 services:
   db:
     image: postgres:15 # Use a specific version
     container_name: nautmanager_db
     restart: always
     environment:
-      POSTGRES_DB: nautmanager_dev
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password # Change in production!
+      # Use environment variables defined below or in an external .env file
+      POSTGRES_DB: ${DB_NAME:-nautmanager_dev}
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # Change in production!
     ports:
-      - "5436:5432" # Map host port 5436 to container port 5432
+      - "${DB_PORT:-5436}:5432" # Use env var for host port mapping
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U user -d nautmanager_dev"]
+        test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-user} -d $${POSTGRES_DB:-nautmanager_dev}"] # Use internal variable
         interval: 10s
         timeout: 5s
         retries: 5
+    networks: # Connect db to the network
+      - nautmanager_net
+
+  server: # Add the backend server service
+    build: ./server # Build from the server directory
+    container_name: nautmanager_server
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3009}:3001" # Map host port 3009 (or from .env) to container port 3001
+    environment:
+      # Pass database connection details from docker-compose env vars
+      DB_HOST: db # Use the service name 'db' for hostname
+      DB_PORT: 5432 # Internal PostgreSQL port
+      DB_USER: ${DB_USER:-user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_NAME: ${DB_NAME:-nautmanager_dev}
+      PORT: 3001
+    volumes:
+      - ./server:/usr/src/app # Mount server code for development changes
+      - /usr/src/app/node_modules # Avoid mounting local node_modules over container ones
+    depends_on:
+      db: # Ensure DB is healthy before server starts
+        condition: service_healthy
+    networks: # Connect server to the network
+      - nautmanager_net
+
+  watcher: # Add the watcher service
+    build: ./watcher # Build from watcher directory
+    container_name: nautmanager_watcher
+    restart: unless-stopped
+    environment:
+      # Pass config from docker-compose env vars (can be set via root .env file)
+      HOST_WATCH_PATH: ${HOST_WATCH_PATH} # Pass the host path itself
+      CONTAINER_WATCH_PATH: ${CONTAINER_WATCH_PATH:-/watch} # Path inside container
+      NAUTMANAGER_API_URL: ${NAUTMANAGER_API_URL:-http://server:3001/api}
+      DEBOUNCE_MS: ${DEBOUNCE_MS:-5000}
+    volumes:
+      # Mount the HOST path (from root .env) to the CONTAINER path
+      - type: bind
+        source: ${HOST_WATCH_PATH} # MUST be set in root .env or via command line
+        target: ${CONTAINER_WATCH_PATH:-/watch}
+        read_only: true # Watcher only needs to read
+    depends_on:
+      - server # Wait for server to be available (though API check is better)
+    networks:
+      - nautmanager_net
 
 volumes:
   postgres_data:

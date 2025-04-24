@@ -23,8 +23,10 @@ ehthumbs.db
 Thumbs.db
 
 # Environment variables
-.env
+.env # Root .env for docker-compose
 .env.*
+server/.env # Server specific env file
+watcher/.env # Watcher specific env file
 !.env.example
 
 # Documentation
@@ -37,4 +39,7 @@ docs/
 *.ntvs*
 *.njsproj
 *.sln
-*.sw? 
+*.sw?
+
+# Watcher specific
+watcher/node_modules/ 

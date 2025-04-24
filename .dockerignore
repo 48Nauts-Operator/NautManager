@@ -18,4 +18,9 @@ client/node_modules
 
 # Server build artifacts
 server/dist
-server/node_modules 
+server/node_modules
+server/.env
+
+# Watcher build artifacts
+watcher/node_modules
+watcher/.env 

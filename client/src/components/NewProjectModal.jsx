@@ -131,7 +131,9 @@ const NewProjectModal = ({ isOpen, onClose, onProjectChange, projectToEdit }) =>
 
     try {
       let response;
-      const apiUrl = `http://localhost:3001/api/projects${isEditMode ? `/${projectToEdit.id}` : ''}`;
+      // Use the correct port (3009) for the API endpoint
+      const apiUrlBase = 'http://localhost:3009/api'; 
+      const apiUrl = `${apiUrlBase}/projects${isEditMode ? `/${projectToEdit.id}` : ''}`;
       const method = isEditMode ? 'PUT' : 'POST';
 
       console.log(`Sending ${method} request to ${apiUrl}...`);
