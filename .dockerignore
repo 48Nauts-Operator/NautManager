@@ -1,0 +1,21 @@
+**/.git
+**/.DS_Store
+**/node_modules
+**/npm-debug.log
+**/yarn-error.log
+**/lerna-debug.log
+
+docs/
+.dockerignore
+.env
+.gitignore
+docker-compose.yml
+README.md
+
+# Client build artifacts
+client/dist
+client/node_modules
+
+# Server build artifacts
+server/dist
+server/node_modules 
